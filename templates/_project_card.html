@@ -1,0 +1,19 @@
+{% load grin %}
+<article class="shot-card">
+  <a class="shot" href="{{ project.get_absolute_url }}" aria-label="{{ project.title }}">
+    <span class="shot-bar"><i></i><i></i><i></i><em>{% if project.live_url %}{{ project.live_url|host }}{% else %}{{ project.repo_url|host }}{% endif %}</em></span>
+    <span class="shot-view"><img src="{{ project.screenshot.url }}" alt="Capture de {{ project.title }}" loading="lazy"></span>
+  </a>
+  <div class="shot-meta">
+    <h3><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></h3>
+    <p>{{ project.tagline }}</p>
+    <div class="shot-foot">
+      <a class="who" href="{{ project.owner.get_absolute_url }}">{% include "_avatar.html" with member=project.owner size="xs" %}{{ project.owner.username }}</a>
+      <span class="counts">
+        <span class="stage stage-{{ project.stage }}">{{ project.get_stage_display }}</span>
+        <span title="Retours posés sur la capture"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>{{ project.pin_count }}</span>
+        <span title="Bravos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.5 4.3 4.3 0 0 1 19.5 10c0 5.400-7.5 10-7.5 10z"/></svg>{{ project.clap_count }}</span>
+      </span>
+    </div>
+  </div>
+</article>

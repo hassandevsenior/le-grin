@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load grin %}
+{% block title %}{{ path.title }} · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow-wide">
+  <p class="eyebrow"><a href="{% url 'paths:list' %}">Parcours</a>{% if path.tech %} · {{ path.tech.name }}{% endif %}</p>
+  <h1>{{ path.title }}</h1>
+  <p class="byline">
+    <a class="who" href="{{ path.author.get_absolute_url }}">{% include "_avatar.html" with member=path.author size="xs" %}{{ path.author.username }}</a>
+    <span class="muted">veut apprendre ça · il y a {{ path.created|timesince }}</span>
+  </p>
+  {% if path.context %}<div class="prose context">{{ path.context|linebreaks }}</div>{% endif %}
+
+  {% if steps and user.is_authenticated %}
+  <div class="progress" data-progress>
+    <div class="gauge gauge-big"><i style="width: {{ percent }}%" data-progress-bar></i></div>
+    <p class="small"><strong data-progress-text>{{ done }} sur {{ steps|length }}</strong> étape{{ steps|length|pluralize }} franchie{{ steps|length|pluralize }} par toi</p>
+  </div>
+  {% endif %}
+
+  <ol class="steps">
+    {% for step in steps %}
+    <li class="step{% if step.done_by|has:user %} is-done{% endif %}" id="etape-{{ step.pk }}">
+      <div class="step-rail"><span>{{ forloop.counter }}</span></div>
+      <div class="step-body">
+        <header class="step-head">
+          <div>
+            <h2>{{ step.title }}</h2>
+            {% if step.why %}<p class="muted">{{ step.why }}</p>{% endif %}
+            <p class="small muted">Étape proposée par {{ step.author.username }}</p>
+          </div>
+          <div class="step-tools">
+            {% if user.is_authenticated %}
+              <button class="btn btn-small btn-done" data-toggle-url="{% url 'paths:done' step.pk %}" data-step-toggle aria-pressed="{{ step.done_by|has:user|yesno:'true,false' }}">Franchie</button>
+            {% endif %}
+            {% if is_author and not forloop.first %}
+              <form method="post" action="{% url 'paths:move_step' step.pk %}">{% csrf_token %}<button class="btn btn-small btn-icon" title="Monter cette étape" aria-label="Monter cette étape">↑</button></form>
+            {% endif %}
+            {% if is_author or step.author == user %}
+              <form method="post" action="{% url 'paths:delete_step' step.pk %}" data-confirm="Retirer cette étape ?">{% csrf_token %}<button class="btn btn-small btn-icon" title="Retirer cette étape" aria-label="Retirer cette étape">×</button></form>
+            {% endif %}
+          </div>
+        </header>
+
+        {% for explanation in step.explanations.all %}
+          <div class="explain">
+            <div class="prose">{{ explanation.summary|urlize|linebreaks }}</div>
+            <p class="explain-foot">
+              <a class="who" href="{{ explanation.author.get_absolute_url }}">{% include "_avatar.html" with member=explanation.author size="xs" %}{{ explanation.author.username }}</a>
+              {% if explanation.resource_url %}<a class="resource" href="{{ explanation.resource_url }}" target="_blank" rel="noopener nofollow">Aller plus loin : {{ explanation.resource_url|host }}</a>{% endif %}
+              {% if user.is_authenticated and explanation.author != user %}
+                <button class="btn btn-small btn-thanks" data-toggle-url="{% url 'paths:thank' explanation.pk %}" aria-pressed="{{ explanation.thanks|has:user|yesno:'true,false' }}">Merci <b data-count>{{ explanation.thanks.all|length }}</b></button>
+              {% else %}
+                <span class="small muted">{{ explanation.thanks.all|length }} merci</span>
+              {% endif %}
+            </p>
+          </div>
+        {% empty %}
+          <p class="empty empty-small">Personne n'a encore expliqué cette étape.</p>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+        <details class="reveal">
+          <summary>Expliquer cette étape</summary>
+          <form method="post" action="{% url 'paths:explain' step.pk %}" class="form">
+            {% csrf_token %}
+            <div class="field"><label for="summary-{{ step.pk }}">Ton résumé</label>
+              <textarea name="summary" id="summary-{{ step.pk }}" rows="4" maxlength="900" required placeholder="Explique l'idée comme à un ami, en quelques phrases."></textarea>
+              <p class="field-help">Résume toi-même ce qu'il faut retenir. Le lien vient après, pour ceux qui veulent creuser.</p></div>
+            <div class="field"><label for="url-{{ step.pk }}">Ressource pour aller plus loin <small>facultatif</small></label>
+              <input type="url" name="resource_url" id="url-{{ step.pk }}" placeholder="https://"></div>
+            <button class="btn btn-primary btn-small">Publier l'explication</button>
+          </form>
+        </details>
+        {% endif %}
+      </div>
+    </li>
+    {% empty %}
+    <li class="empty">Le chemin n'est pas encore tracé. Par quoi faut-il commencer ? Propose la première étape.</li>
+    {% endfor %}
+  </ol>
+
+  {% if can_add_step %}
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'paths:add_step' path.pk %}" class="card form add-step">
+      {% csrf_token %}
+      <h2>Proposer l'étape {{ steps|length|add:1 }} <span class="muted small">sur {{ max_steps }} maximum</span></h2>
+      {% include "_fields.html" with form=step_form %}
+      <button class="btn btn-primary">Ajouter l'étape</button>
+    </form>
+    {% else %}
+    <p class="empty"><a href="{% url 'accounts:login' %}?next={{ request.path }}">Connecte-toi</a> pour proposer une étape ou une explication.</p>
+    {% endif %}
+  {% else %}
+    <p class="muted small">Ce parcours a ses {{ max_steps }} étapes. Un bon chemin est court : il reste à bien expliquer chacune.</p>
+  {% endif %}
+</section>
+{% endblock %}

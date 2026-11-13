@@ -1,0 +1,10 @@
+<form method="post" action="{% url 'debates:vote' debate.slug %}" class="vote{% if chosen %} is-voted{% endif %}">
+  {% csrf_token %}
+  {% if back %}<input type="hidden" name="back" value="{{ back }}">{% endif %}
+  {% for option in tally %}
+    <button name="choice" value="{{ option.key }}" class="vote-option vote-{{ option.key }}{% if chosen == option.key %} is-chosen{% endif %}" {% if chosen %}style="--share: {{ option.percent }}%"{% endif %} {% if chosen == option.key %}aria-pressed="true"{% endif %}>
+      <span>{{ option.label }}</span>
+      {% if chosen %}<b>{{ option.percent }} %</b>{% endif %}
+    </button>
+  {% endfor %}
+</form>

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Membres · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page">
+  <header class="page-head">
+    <div><h1>Les membres</h1><p>Trouve quelqu'un qui travaille sur la même techno que toi, ou dans ta ville.</p></div>
+  </header>
+
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Pseudo, ville, mot-clé" aria-label="Rechercher un membre">
+    <select name="niveau" aria-label="Niveau" data-autosubmit>
+      <option value="">Tous les niveaux</option>
+      {% for key, label in levels %}<option value="{{ key }}" {% if key == level %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    {% if tech %}<input type="hidden" name="tech" value="{{ tech }}">{% endif %}
+    <button class="btn btn-small">Chercher</button>
+  </form>
+  <p class="tags">
+    <a class="tag{% if not tech %} is-on{% endif %}" href="{% querystring tech=None page=None %}">Toutes</a>
+    {% for item in techs %}<a class="tag{% if item.slug == tech %} is-on{% endif %}" href="{% querystring tech=item.slug page=None %}">{{ item.name }} <small>{{ item.n }}</small></a>{% endfor %}
+  </p>
+
+  <div class="people">
+    {% for member in page %}
+      <a class="person" href="{{ member.get_absolute_url }}">
+        {% include "_avatar.html" with size="lg" %}
+        <strong>{{ member.username }}</strong>
+        <small>{{ member.get_level_display }}{% if member.city %} · {{ member.city }}{% endif %}</small>
+        {% if member.bio %}<p>{{ member.bio }}</p>{% endif %}
+        <span class="tags">{% for item in member.techs.all|slice:":4" %}<span class="tag">{{ item.name }}</span>{% endfor %}</span>
+        <span class="person-stats">{{ member.project_count }} projet{{ member.project_count|pluralize }} · {{ member.kept }} engagement{{ member.kept|pluralize }} tenu{{ member.kept|pluralize }}</span>
+      </a>
+    {% empty %}
+      <p class="empty">Personne ne correspond à cette recherche.</p>
+    {% endfor %}
+  </div>
+  {% include "_pagination.html" %}
+</section>
+{% endblock %}

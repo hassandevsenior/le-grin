@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load grin %}
+{% block title %}{{ project.title }} · {{ SITE_NAME }}{% endblock %}
+{% block description %}{{ project.tagline }}{% endblock %}
+{% block content %}
+<section class="wrap page">
+  <header class="project-head">
+    <div>
+      <p class="eyebrow"><a href="{% url 'projects:list' %}">Le mur</a> · <span class="stage stage-{{ project.stage }}">{{ project.get_stage_display }}</span></p>
+      <h1>{{ project.title }}</h1>
+      <p class="lead">{{ project.tagline }}</p>
+      <p class="byline">
+        <a class="who" href="{{ project.owner.get_absolute_url }}">{% include "_avatar.html" with member=project.owner size="xs" %}{{ project.owner.username }}</a>
+        <span class="muted">· accroché il y a {{ project.created|timesince }}</span>
+      </p>
+    </div>
+    <div class="project-actions">
+      <button class="btn btn-clap" data-toggle-url="{% url 'projects:applaud' project.slug %}" aria-pressed="{{ clapped|yesno:'true,false' }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.5 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>
+        Bravo <b data-count>{{ clap_count }}</b>
+      </button>
+      {% if project.live_url %}<a class="btn btn-primary" href="{{ project.live_url }}" target="_blank" rel="noopener nofollow">Ouvrir {{ project.live_url|host }}</a>{% endif %}
+      {% if project.repo_url %}<a class="btn" href="{{ project.repo_url }}" target="_blank" rel="noopener nofollow">Voir le code</a>{% endif %}
+    </div>
+  </header>
+
+  <div class="board-wrap">
+    <div class="board" data-board data-create-url="{% url 'projects:pin_create' project.slug %}" data-owner="{{ is_owner|yesno:'1,0' }}">
+      <div class="board-bar">
+        <span class="shot-bar"><i></i><i></i><i></i><em>{% if project.live_url %}{{ project.live_url|host }}{% else %}{{ project.repo_url|host }}{% endif %}</em></span>
+        <button type="button" class="btn btn-small btn-primary" data-pin-toggle aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+          <span data-pin-toggle-label>Poser un retour</span>
+        </button>
+      </div>
+      <div class="board-canvas" data-canvas>
+        <img src="{{ project.screenshot.url }}" alt="Capture d'écran de {{ project.title }}">
+        <div class="board-layer" data-layer></div>
+        <form class="composer" data-composer hidden>
+          <div class="composer-kinds" role="radiogroup" aria-label="Type de retour">
+            {% for key, label in kinds %}
+              <label class="kind kind-{{ key }}"><input type="radio" name="kind" value="{{ key }}" {% if key == "idea" %}checked{% endif %}><span>{{ label }}</span></label>
+            {% endfor %}
+          </div>
+          <textarea name="text" rows="3" maxlength="280" placeholder="Ton retour sur cet endroit précis" aria-label="Ton retour" required></textarea>
+          <p class="composer-error" data-composer-error role="alert" hidden></p>
+          <div class="composer-actions">
+            <button type="button" class="btn btn-small" data-composer-cancel>Annuler</button>
+            <button class="btn btn-small btn-primary">Publier</button>
+          </div>
+        </form>
+      </div>
+      <p class="board-hint" data-hint hidden>Clique sur l'endroit de la capture dont tu veux parler.</p>
+    </div>
+
+    <aside class="pins">
+      <h2>Retours <span class="muted" data-pin-total>{{ pins|length }}</span></h2>
+      <ol class="pin-list" data-pin-list>
+        {% for pin in pins %}
+          <li class="pin-item kind-{{ pin.kind }}{% if pin.resolved %} is-resolved{% endif %}" id="pin-{{ pin.pk }}">
+            <span class="pin-dot">{{ forloop.counter }}</span>
+            <div><p>{{ pin.text }}</p><small>{{ pin.author.username }} · {{ pin.get_kind_display }}</small></div>
+          </li>
+        {% endfor %}
+      </ol>
+      <p class="empty" data-pin-empty {% if pins %}hidden{% endif %}>Aucun retour pour l'instant. Sois le premier : clique sur « Poser un retour », puis sur la capture.</p>
+    </aside>
+  </div>
+  {{ pins_data|json_script:"pins-data" }}
+
+  <div class="project-body">
+    <div>
+      {% if project.description %}<h2>L'histoire</h2><div class="prose">{{ project.description|urlize|linebreaks }}</div>{% endif %}
+      {% if help_requests %}
+        <h2>Ce projet cherche du renfort</h2>
+        {% for item in help_requests %}
+          <a class="row-card" href="{{ item.get_absolute_url }}"><span class="chip chip-size">{{ item.get_size_display }}</span><strong>{{ item.title }}</strong></a>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <aside>
+      <h2>Construit avec</h2>
+      <p class="tags">{% for item in project.techs.all %}<a class="tag" href="{% url 'projects:list' %}?tech={{ item.slug }}">{{ item.name }}</a>{% empty %}<span class="muted">Non précisé</span>{% endfor %}</p>
+      {% if is_owner %}
+        <h2>Ton projet</h2>
+        <p class="stack">
+          <a class="btn btn-small" href="{% url 'projects:edit' project.slug %}">Modifier</a>
+          <a class="btn btn-small" href="{% url 'collabs:create' %}?projet={{ project.pk }}">Demander un coup de main</a>
+        </p>
+        <form method="post" action="{% url 'projects:delete' project.slug %}" data-confirm="Retirer ce projet du mur ? Les retours seront perdus.">
+          {% csrf_token %}<button class="btn btn-small btn-danger">Retirer du mur</button>
+        </form>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}

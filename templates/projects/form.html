@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{% if project %}Modifier {{ project.title }}{% else %}Accrocher un projet{% endif %} · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow">
+  <header class="page-head">
+    <div>
+      <h1>{% if project %}Modifier {{ project.title }}{% else %}Accroche ton projet au mur{% endif %}</h1>
+      <p>Ici on montre avant d'expliquer : la capture d'écran passe en premier. Une app mobile, un outil en ligne de commande ? Une capture de l'écran principal ou du terminal fait l'affaire.</p>
+    </div>
+  </header>
+  <form method="post" enctype="multipart/form-data" class="card form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors.0 }}</div>{% endif %}
+
+    <div class="field{% if form.screenshot.errors %} has-error{% endif %}">
+      <label for="{{ form.screenshot.id_for_label }}">Capture d'écran</label>
+      <div class="drop" data-drop>
+        {{ form.screenshot }}
+        <img data-drop-preview alt="" {% if project %}src="{{ project.screenshot.url }}"{% else %}hidden{% endif %}>
+        <p data-drop-text><strong>Dépose ta capture ici</strong>, colle-la avec Ctrl+V, ou clique pour choisir un fichier.<br><small>PNG, JPEG ou WebP, 5 Mo maximum. Elle sera allégée automatiquement.</small></p>
+      </div>
+      {% if form.screenshot.errors %}<p class="field-error" role="alert">{{ form.screenshot.errors.0 }}</p>{% endif %}
+    </div>
+
+    {% for field in form.visible_fields %}{% if field.name != "screenshot" %}
+      <div class="field{% if field.errors %} has-error{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <small>facultatif</small>{% endif %}</label>
+        {{ field }}
+        {% if field.errors %}<p class="field-error" role="alert">{{ field.errors.0 }}</p>
+        {% elif field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
+      </div>
+    {% endif %}{% endfor %}
+
+    <button class="btn btn-primary">{% if project %}Enregistrer{% else %}Accrocher au mur{% endif %}</button>
+  </form>
+</section>
+{% endblock %}

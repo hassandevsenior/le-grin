@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Coups de main · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page">
+  <header class="page-head">
+    <div><h1>Coups de main</h1><p>Quelqu'un bloque, quelqu'un s'engage. Pour une durée choisie, annoncée à l'avance, qui expire toute seule. Fini les « je regarde ça » sans suite.</p></div>
+    <a class="btn btn-primary" href="{% url 'collabs:create' %}">Demander un coup de main</a>
+  </header>
+  <p class="tags">
+    <a class="tag{% if not show %} is-on{% endif %}" href="{% url 'collabs:list' %}">Demandes ouvertes</a>
+    <a class="tag{% if show == 'sans-renfort' %} is-on{% endif %}" href="?voir=sans-renfort">Encore sans renfort</a>
+    <a class="tag{% if show == 'tout' %} is-on{% endif %}" href="?voir=tout">Tout, y compris résolues</a>
+  </p>
+  <div class="cards">
+    {% for item in requests %}
+      <a class="card help-card{% if not item.is_open %} is-closed{% endif %}" href="{{ item.get_absolute_url }}">
+        <p class="help-top">
+          <span class="chip chip-size">{{ item.get_size_display }}</span>
+          {% if not item.is_open %}<span class="chip chip-kept">Résolu</span>
+          {% elif item.helpers %}<span class="chip chip-active">{{ item.helpers }} engagé{{ item.helpers|pluralize }}</span>
+          {% else %}<span class="chip chip-waiting">Attend du renfort</span>{% endif %}
+        </p>
+        <h3>{{ item.title }}</h3>
+        <p class="clamp">{{ item.details }}</p>
+        <p class="who">{% include "_avatar.html" with member=item.author size="xs" %}{{ item.author.username }}{% if item.project %} · sur {{ item.project.title }}{% endif %}</p>
+      </a>
+    {% empty %}
+      <p class="empty">Rien ici. Si tu bloques sur quelque chose, c'est le moment de le dire.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

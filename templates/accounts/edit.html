@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Mon profil · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow">
+  <header class="page-head"><div><h1>Ton profil</h1><p>Ce que les autres voient quand ils cherchent quelqu'un avec qui construire.</p></div></header>
+  <form method="post" class="card form" novalidate>
+    {% csrf_token %}
+    {% include "_fields.html" %}
+    <button class="btn btn-primary">Enregistrer</button>
+  </form>
+</section>
+{% endblock %}

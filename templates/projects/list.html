@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Le mur des projets · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page">
+  <header class="page-head">
+    <div><h1>Le mur</h1><p>Ce que les devs d'ici construisent. Survole une capture pour la faire défiler, ouvre-la pour y poser un retour.</p></div>
+    <a class="btn btn-primary" href="{% url 'projects:create' %}">Accrocher un projet</a>
+  </header>
+
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Chercher un projet" aria-label="Chercher un projet">
+    <select name="etat" aria-label="État" data-autosubmit>
+      <option value="">Tous les états</option>
+      {% for key, label in stages %}<option value="{{ key }}" {% if key == stage %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="tri" aria-label="Tri" data-autosubmit>
+      <option value="">Les plus récents</option>
+      <option value="retours" {% if sort == "retours" %}selected{% endif %}>En attente de retours</option>
+      <option value="bravos" {% if sort == "bravos" %}selected{% endif %}>Les plus salués</option>
+    </select>
+    {% if tech %}<input type="hidden" name="tech" value="{{ tech }}">{% endif %}
+    <button class="btn btn-small">Chercher</button>
+  </form>
+  <p class="tags">
+    <a class="tag{% if not tech %} is-on{% endif %}" href="{% querystring tech=None page=None %}">Toutes les technos</a>
+    {% for item in techs %}<a class="tag{% if item.slug == tech %} is-on{% endif %}" href="{% querystring tech=item.slug page=None %}">{{ item.name }} <small>{{ item.n }}</small></a>{% endfor %}
+  </p>
+
+  {% if page.object_list %}
+    <div class="wall">{% for project in page %}{% include "_project_card.html" %}{% endfor %}</div>
+  {% else %}
+    <p class="empty">Aucun projet ici pour l'instant. <a href="{% url 'projects:create' %}">Accroche le tien</a>, il sera le premier.</p>
+  {% endif %}
+  {% include "_pagination.html" %}
+</section>
+{% endblock %}

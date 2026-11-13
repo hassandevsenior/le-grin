@@ -1,0 +1,13 @@
+<aside class="debate-card" id="debat">
+  <p class="eyebrow">Le débat du moment</p>
+  <h2><a href="{{ debate.get_absolute_url }}">{{ debate.question }}</a></h2>
+  {% include "_vote.html" with back="home" %}
+  {% if my_stance %}
+    <p class="debate-note">{% if my_stance.text %}Ton avis est publié.{% else %}Tu as voté.{% endif %} <a href="{{ debate.get_absolute_url }}#voter">{% if my_stance.text %}Lire les autres{% else %}Dis pourquoi{% endif %}</a></p>
+  {% elif chosen %}
+    <p class="debate-note"><strong>Ton vote t'attend.</strong> Crée ton compte pour le publier : ce sera ton premier message ici.</p>
+    <a class="btn btn-primary btn-block" href="{% url 'accounts:signup' %}">Publier mon avis</a>
+  {% else %}
+    <p class="debate-note">Réponds en un clic pour voir ce qu'en pensent les autres.</p>
+  {% endif %}
+</aside>

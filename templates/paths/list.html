@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Parcours · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page">
+  <header class="page-head">
+    <div><h1>Parcours</h1><p>Tu dis ce que tu veux apprendre. La communauté découpe le chemin en étapes, puis chacun explique une étape en la résumant, au lieu de t'envoyer dix PDF.</p></div>
+    <a class="btn btn-primary" href="{% url 'paths:create' %}">Je veux apprendre…</a>
+  </header>
+  <p class="tags">
+    <a class="tag{% if not show %} is-on{% endif %}" href="{% url 'paths:list' %}">Tous</a>
+    <a class="tag{% if show == 'a-tracer' %} is-on{% endif %}" href="?voir=a-tracer">Chemin à tracer</a>
+  </p>
+  <div class="cards">
+    {% for item in paths %}
+      <a class="card path-card" href="{{ item.get_absolute_url }}">
+        <p class="help-top">{% if item.tech %}<span class="tag">{{ item.tech.name }}</span>{% endif %}
+          {% if item.step_count < 3 %}<span class="chip chip-waiting">Chemin à tracer</span>{% endif %}</p>
+        <h3>{{ item.title }}</h3>
+        <p class="trail" aria-hidden="true">{% for dot in "1234567"|slice:item.step_count %}<i></i>{% endfor %}</p>
+        <p class="small muted">{{ item.step_count }} étape{{ item.step_count|pluralize }} · {{ item.explanation_count }} explication{{ item.explanation_count|pluralize }}</p>
+        <p class="who">{% include "_avatar.html" with member=item.author size="xs" %}demandé par {{ item.author.username }}</p>
+      </a>
+    {% empty %}
+      <p class="empty">Aucun parcours ici. Qu'est-ce que tu aimerais apprendre ?</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

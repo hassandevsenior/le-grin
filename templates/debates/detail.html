@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ debate.question }} · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow-wide">
+  <p class="eyebrow"><a href="{% url 'debates:list' %}">Débats</a></p>
+  <h1>{{ debate.question }}</h1>
+  {% if debate.intro %}<p class="lead">{{ debate.intro }}</p>{% endif %}
+
+  <div class="card debate-box" id="voter">
+    {% include "_vote.html" %}
+    {% if my_stance %}
+      <form method="post" action="{% url 'debates:vote' debate.slug %}" class="form">
+        {% csrf_token %}
+        <input type="hidden" name="choice" value="{{ my_stance.choice }}">
+        <div class="field">
+          <label for="stance-text">Pourquoi « {{ my_stance.get_choice_display }} » ?</label>
+          <textarea name="text" id="stance-text" rows="3" maxlength="500" placeholder="Ton argument, ton expérience, un exemple vécu.">{{ my_stance.text }}</textarea>
+        </div>
+        <button class="btn btn-primary btn-small">{% if my_stance.text %}Mettre à jour{% else %}Publier mon argument{% endif %}</button>
+      </form>
+    {% elif chosen %}
+      <p class="debate-note"><strong>Ton vote t'attend.</strong> Crée ton compte pour le publier et dire pourquoi.</p>
+      <a class="btn btn-primary" href="{% url 'accounts:signup' %}">Publier mon avis</a>
+    {% else %}
+      <p class="debate-note">Réponds en un clic pour voir la répartition.</p>
+    {% endif %}
+  </div>
+
+  <p class="tags">
+    <a class="tag{% if not side %} is-on{% endif %}" href="{{ debate.get_absolute_url }}">Tous les arguments</a>
+    {% for option in tally %}<a class="tag{% if side == option.key %} is-on{% endif %}" href="?avis={{ option.key }}">{{ option.label }} <small>{{ option.count }}</small></a>{% endfor %}
+  </p>
+
+  {% for stance in stances %}
+    <blockquote class="stance stance-{{ stance.choice }}">
+      <p class="stance-q"><a class="who" href="{{ stance.user.get_absolute_url }}">{% include "_avatar.html" with member=stance.user size="xs" %}{{ stance.user.username }}</a> <span class="muted">{{ stance.user.get_level_display }}</span> <b>{{ stance.get_choice_display }}</b></p>
+      <p>{{ stance.text }}</p>
+    </blockquote>
+  {% empty %}
+    <p class="empty">Pas encore d'argument de ce côté. Le tien ouvrirait le bal.</p>
+  {% endfor %}
+</section>
+{% endblock %}

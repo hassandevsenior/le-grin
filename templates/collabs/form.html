@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Demander un coup de main · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow">
+  <header class="page-head"><div><h1>Sur quoi tu bloques ?</h1><p>Plus ta demande est précise, plus vite quelqu'un pourra s'engager dessus en sachant où il met les pieds.</p></div></header>
+  <form method="post" class="card form" novalidate>
+    {% csrf_token %}
+    {% include "_fields.html" %}
+    <button class="btn btn-primary">Publier la demande</button>
+  </form>
+</section>
+{% endblock %}

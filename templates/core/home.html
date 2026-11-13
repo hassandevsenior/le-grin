@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if not user.is_authenticated %}
+<section class="hero">
+  <div class="wrap hero-in">
+    <div class="hero-text">
+      <p class="eyebrow">Le coin des devs</p>
+      <h1>Ici, tu es <em>en famille</em>.</h1>
+      <p class="lead">Chez nous, le grin, c'est le cercle où on se retrouve autour du thé pour refaire le monde. Celui-ci est pour celles et ceux qui codent. Que tu écrives ton premier <code>print</code> ou que tu déploies depuis quinze ans, il y a une place pour toi.</p>
+      <p class="hero-actions">
+        <a class="btn btn-primary" href="{% url 'accounts:signup' %}">Prendre place</a>
+        <a class="btn" href="{% url 'projects:list' %}">Voir le mur des projets</a>
+      </p>
+      <p class="hero-stats"><b>{{ stats.members }}</b> membres · <b>{{ stats.projects }}</b> projets au mur · <b>{{ stats.paths }}</b> parcours tracés</p>
+    </div>
+    {% if debate %}{% include "core/_debate_card.html" %}{% endif %}
+  </div>
+</section>
+{% else %}
+<section class="wrap welcome">
+  <div>
+    <p class="eyebrow">Bon retour</p>
+    <h1>Salut {{ user.username }}, quoi de neuf au grin ?</h1>
+    <p class="hero-actions">
+      <a class="btn btn-primary" href="{% url 'projects:create' %}">Accrocher un projet</a>
+      <a class="btn" href="{% url 'collabs:create' %}">Demander un coup de main</a>
+      <a class="btn" href="{% url 'paths:create' %}">Je veux apprendre…</a>
+    </p>
+  </div>
+  {% if debate %}{% include "core/_debate_card.html" %}{% endif %}
+</section>
+{% endif %}
+
+<section class="wrap block">
+  <header class="block-head">
+    <div>
+      <h2>Le mur</h2>
+      <p>Pas de lien nu : chaque projet se montre. Clique sur une capture pour y poser un retour, pile à l'endroit concerné.</p>
+    </div>
+    <a class="more" href="{% url 'projects:list' %}">Tout le mur</a>
+  </header>
+  {% if projects %}
+    <div class="wall">{% for project in projects %}{% include "_project_card.html" %}{% endfor %}</div>
+  {% else %}
+    <p class="empty">Le mur est encore vide. <a href="{% url 'projects:create' %}">Accroche le premier projet.</a></p>
+  {% endif %}
+</section>
+
+<section class="wrap block duo">
+  <div>
+    <header class="block-head">
+      <div><h2>Coups de main</h2><p>On s'engage pour une durée, ou on ne s'engage pas.</p></div>
+      <a class="more" href="{% url 'collabs:list' %}">Toutes les demandes</a>
+    </header>
+    {% for item in help_requests %}
+      <a class="row-card" href="{{ item.get_absolute_url }}">
+        <span class="chip chip-size">{{ item.get_size_display }}</span>
+        <strong>{{ item.title }}</strong>
+        <small>{{ item.author.username }} · il y a {{ item.created|timesince }}</small>
+      </a>
+    {% empty %}
+      <p class="empty">Personne n'est bloqué en ce moment. <a href="{% url 'collabs:create' %}">Tu l'es ?</a></p>
+    {% endfor %}
+  </div>
+  <div>
+    <header class="block-head">
+      <div><h2>Parcours</h2><p>« Je veux apprendre X » : la communauté trace la route.</p></div>
+      <a class="more" href="{% url 'paths:list' %}">Tous les parcours</a>
+    </header>
+    {% for item in paths %}
+      <a class="row-card" href="{{ item.get_absolute_url }}">
+        <span class="chip">{{ item.step_count }} étape{{ item.step_count|pluralize }}</span>
+        <strong>{{ item.title }}</strong>
+        <small>demandé par {{ item.author.username }}</small>
+      </a>
+    {% empty %}
+      <p class="empty">Aucun parcours pour l'instant. <a href="{% url 'paths:create' %}">Dis ce que tu veux apprendre.</a></p>
+    {% endfor %}
+  </div>
+</section>
+
+{% if not user.is_authenticated %}
+<section class="wrap block how">
+  <h2>Comment ça marche</h2>
+  <ol class="how-list">
+    <li><b>Tu arrives, tu donnes ton avis.</b> Le débat du moment sert de présentation : ton premier message est écrit avant même d'avoir un compte.</li>
+    <li><b>Tu montres ce que tu construis.</b> Une capture, un lien, le dépôt. Les autres posent leurs retours directement sur l'image.</li>
+    <li><b>Tu apprends par étapes.</b> Tu dis ce que tu veux apprendre, la communauté découpe le chemin puis explique chaque étape en résumé.</li>
+    <li><b>Tu aides pour de vrai.</b> S'engager sur un coup de main, c'est choisir une durée. Un engagement tenu, c'est la seule réputation qui compte ici.</li>
+  </ol>
+</section>
+{% endif %}
+{% endblock %}

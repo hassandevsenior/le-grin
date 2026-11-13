@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ member.username }} · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page">
+  <header class="profile-head">
+    {% include "_avatar.html" with size="xl" %}
+    <div>
+      <h1>{{ member.username }}</h1>
+      <p class="muted">{{ member.get_level_display }}{% if member.city %} · {{ member.city }}{% endif %} · au grin depuis {{ member.date_joined|date:"F Y" }}</p>
+      {% if member.bio %}<p class="lead">{{ member.bio }}</p>{% endif %}
+      <p class="tags">{% for item in member.techs.all %}<a class="tag" href="{% url 'core:members' %}?tech={{ item.slug }}">{{ item.name }}</a>{% endfor %}</p>
+      <p class="hero-actions">
+        {% if member.github %}<a class="btn btn-small" href="{{ member.github }}" rel="noopener nofollow" target="_blank">GitHub</a>{% endif %}
+        {% if member == user %}<a class="btn btn-small" href="{% url 'accounts:edit' %}">Modifier mon profil</a>{% endif %}
+      </p>
+    </div>
+    <dl class="scores">
+      <div><dt>Engagements tenus</dt><dd>{{ member.kept_count }}</dd></div>
+      <div><dt>Explications données</dt><dd>{{ explanation_count }}</dd></div>
+      <div><dt>Projets au mur</dt><dd>{{ projects|length }}</dd></div>
+    </dl>
+  </header>
+
+  {% if stances %}
+  <div class="block">
+    <h2>Ses prises de position</h2>
+    {% for stance in stances %}
+      <blockquote class="stance stance-{{ stance.choice }}">
+        <p class="stance-q"><a href="{{ stance.debate.get_absolute_url }}">{{ stance.debate.question }}</a> <b>{{ stance.get_choice_display }}</b></p>
+        <p>{{ stance.text }}</p>
+      </blockquote>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="block">
+    <h2>Au mur</h2>
+    {% if projects %}
+      <div class="wall">{% for project in projects %}{% include "_project_card.html" %}{% endfor %}</div>
+    {% else %}
+      <p class="empty">Pas encore de projet au mur.{% if member == user %} <a href="{% url 'projects:create' %}">Accroche le tien.</a>{% endif %}</p>
+    {% endif %}
+  </div>
+
+  {% if commitments %}
+  <div class="block">
+    <h2>Ses engagements</h2>
+    {% for commitment in commitments %}
+      <a class="row-card" href="{{ commitment.request.get_absolute_url }}">
+        <span class="chip chip-{% if commitment.is_expired %}expired{% else %}{{ commitment.status }}{% endif %}">{% if commitment.is_expired %}Expiré{% else %}{{ commitment.get_status_display }}{% endif %}</span>
+        <strong>{{ commitment.request.title }}</strong>
+        <small>{{ commitment.get_days_display }}</small>
+      </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

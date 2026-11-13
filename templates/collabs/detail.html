@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ help_request.title }} · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page two-col">
+  <article>
+    <p class="eyebrow"><a href="{% url 'collabs:list' %}">Coups de main</a> · {% if help_request.is_open %}Demande ouverte{% else %}Résolu{% endif %}</p>
+    <h1>{{ help_request.title }}</h1>
+    <p class="byline">
+      <a class="who" href="{{ help_request.author.get_absolute_url }}">{% include "_avatar.html" with member=help_request.author size="xs" %}{{ help_request.author.username }}</a>
+      <span class="muted">· il y a {{ help_request.created|timesince }}</span>
+      <span class="chip chip-size">{{ help_request.get_size_display }}</span>
+    </p>
+    <div class="prose">{{ help_request.details|urlize|linebreaks }}</div>
+    <p class="stack">
+      {% if help_request.repo_url %}<a class="btn btn-small" href="{{ help_request.repo_url }}" target="_blank" rel="noopener nofollow">Voir le dépôt</a>{% endif %}
+      {% if help_request.project %}<a class="btn btn-small" href="{{ help_request.project.get_absolute_url }}">Le projet : {{ help_request.project.title }}</a>{% endif %}
+    </p>
+
+    <h2 id="fil">Fil d'avancement</h2>
+    {% for update in updates %}
+      <div class="update">
+        {% include "_avatar.html" with member=update.author size="sm" %}
+        <div><p class="update-meta"><strong>{{ update.author.username }}</strong> <span class="muted">il y a {{ update.created|timesince }}</span></p>
+        <div class="prose">{{ update.text|urlize|linebreaks }}</div></div>
+      </div>
+    {% empty %}
+      <p class="empty">Pas encore de point d'avancement.</p>
+    {% endfor %}
+    {% if can_post %}
+      <form method="post" action="{% url 'collabs:update' help_request.pk %}" class="form inline-form">
+        {% csrf_token %}{% include "_fields.html" with form=update_form %}
+        <button class="btn btn-primary btn-small">Publier le point</button>
+      </form>
+    {% else %}
+      <p class="muted small">Le fil est réservé à l'auteur et aux personnes engagées : ici, on avance entre gens qui ont dit qu'ils seraient là.</p>
+    {% endif %}
+  </article>
+
+  <aside class="side">
+    <div class="card" id="engagement">
+      <h2>Qui est engagé</h2>
+      {% for commitment in commitments %}
+        <div class="commit">
+          <p class="who"><a href="{{ commitment.user.get_absolute_url }}">{% include "_avatar.html" with member=commitment.user size="xs" %}{{ commitment.user.username }}</a>
+            <span class="chip chip-{% if commitment.is_expired %}expired{% else %}{{ commitment.status }}{% endif %}">{% if commitment.is_expired %}Expiré{% else %}{{ commitment.get_status_display }}{% endif %}</span></p>
+          {% if commitment.message %}<p class="commit-msg">« {{ commitment.message }} »</p>{% endif %}
+          {% if commitment.is_running %}
+            <div class="gauge" role="progressbar" aria-valuenow="{{ commitment.progress }}" aria-valuemin="0" aria-valuemax="100"><i style="width: {{ commitment.progress }}%"></i></div>
+            <p class="small muted">Engagé pour {{ commitment.get_days_display }} · encore {{ commitment.ends_at|timeuntil }}</p>
+          {% endif %}
+          {% if is_author and commitment.status != "kept" %}
+            <form method="post" action="{% url 'collabs:kept' help_request.pk commitment.pk %}">{% csrf_token %}<button class="btn btn-small">Confirmer : engagement tenu</button></form>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="empty">Personne encore. Ton aide peut tout débloquer.</p>
+      {% endfor %}
+    </div>
+
+    {% if is_author %}
+      <form method="post" action="{% url 'collabs:toggle' help_request.pk %}" class="card">
+        {% csrf_token %}
+        <h2>Ta demande</h2>
+        <p class="small muted">Quand c'est réglé, dis-le : ça libère tout le monde, et pense à confirmer les engagements tenus.</p>
+        <button class="btn btn-block">{% if help_request.is_open %}Marquer comme résolu{% else %}Rouvrir la demande{% endif %}</button>
+      </form>
+    {% elif mine and mine.is_running %}
+      <form method="post" action="{% url 'collabs:release' help_request.pk %}" class="card">
+        {% csrf_token %}
+        <h2>Tu es engagé</h2>
+        <p class="small muted">Un imprévu ? Se libérer clairement vaut mieux que disparaître.</p>
+        <button class="btn btn-block">Me libérer de cet engagement</button>
+      </form>
+    {% elif help_request.is_open %}
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'collabs:commit' help_request.pk %}" class="card form commit-form">
+        {% csrf_token %}
+        <h2>M'engager</h2>
+        <p class="small muted">L'auteur estime le chantier à <strong>{{ help_request.get_size_display|lower }}</strong>. Choisis une durée que tu tiendras : passé ce délai, ton engagement expire tout seul.</p>
+        {% include "_fields.html" with form=commit_form %}
+        <button class="btn btn-primary btn-block">Je m'engage</button>
+      </form>
+      {% else %}
+      <div class="card">
+        <h2>Tu peux aider ?</h2>
+        <p class="small muted">Connecte-toi pour t'engager sur cette demande.</p>
+        <a class="btn btn-primary btn-block" href="{% url 'accounts:login' %}?next={{ request.path }}">Connexion</a>
+      </div>
+      {% endif %}
+    {% endif %}
+  </aside>
+</section>
+{% endblock %}

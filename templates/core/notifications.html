@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Notifications · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow">
+  <header class="page-head"><div><h1>Notifications</h1></div></header>
+  {% for item in items %}
+    <a class="row-card{% if not item.read %} is-new{% endif %}" href="{{ item.url }}">
+      <strong>{{ item.text }}</strong>
+      <small>il y a {{ item.created|timesince }}</small>
+    </a>
+  {% empty %}
+    <p class="empty">Rien de neuf pour l'instant. Pose un retour sur un projet, ça lance souvent la conversation.</p>
+  {% endfor %}
+</section>
+{% endblock %}

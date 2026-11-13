@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Je veux apprendre · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow">
+  <header class="page-head"><div><h1>Qu'est-ce que tu veux apprendre ?</h1><p>Pas besoin de savoir par où commencer : c'est justement ce que la communauté va tracer pour toi.</p></div></header>
+  <form method="post" class="card form" novalidate>
+    {% csrf_token %}
+    {% include "_fields.html" %}
+    <button class="btn btn-primary">Lancer le parcours</button>
+  </form>
+</section>
+{% endblock %}

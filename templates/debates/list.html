@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Débats · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow-wide">
+  <header class="page-head"><div><h1>Débats</h1><p>Une question, trois réponses possibles, un argument. On peut ne pas être d'accord et rester en famille.</p></div></header>
+  {% for debate in debates %}
+    <a class="card debate-row" href="{{ debate.get_absolute_url }}">
+      {% if debate.featured %}<span class="chip chip-active">À la une</span>{% endif %}
+      <h3>{{ debate.question }}</h3>
+      <p class="small muted">{{ debate.voices }} voix</p>
+    </a>
+  {% empty %}
+    <p class="empty">Aucun débat pour l'instant.</p>
+  {% endfor %}
+</section>
+{% endblock %}

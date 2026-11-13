@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Connexion · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="wrap page narrow">
+  <header class="page-head"><div><h1>Content de te revoir.</h1></div></header>
+  <form method="post" class="card form" novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="form-error" role="alert">Pseudo, e-mail ou mot de passe incorrect.</div>{% endif %}
+    <div class="field">
+      <label for="id_username">Pseudo ou e-mail</label>
+      <input type="text" name="username" id="id_username" autocomplete="username" required autofocus value="{{ form.username.value|default:'' }}">
+    </div>
+    <div class="field">
+      <label for="id_password">Mot de passe</label>
+      <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn btn-primary btn-block">Entrer</button>
+    <p class="form-alt">Pas encore de compte ? <a href="{% url 'accounts:signup' %}">Prendre place</a></p>
+  </form>
+</section>
+{% endblock %}
