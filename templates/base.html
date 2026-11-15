@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ SITE_NAME }}, le coin des devs{% endblock %}</title>
   <meta name="description" content="{% block description %}Un grin pour les développeurs : montrer ses projets, recevoir des retours précis, apprendre étape par étape et s'entraider pour de vrai.{% endblock %}">
-  <meta name="theme-color" content="#c8502b">
+  <meta name="theme-color" content="#3a9f22">
   <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
   <link rel="stylesheet" href="{% static 'css/grin.css' %}">
   <script src="{% static 'js/grin.js' %}" defer></script>
@@ -16,7 +16,7 @@
 <header class="top">
   <div class="wrap top-in">
     <a class="brand" href="{% url 'core:home' %}" aria-label="{{ SITE_NAME }}, accueil">
-      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><path d="M8 6h16l-2.2 19a3 3 0 0 1-3 2.6h-5.6a3 3 0 0 1-3-2.6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.4 15h13.2l-1.1 9.6a1.6 1.6 0 0 1-1.6 1.4h-7.8a1.6 1.6 0 0 1-1.6-1.4z" fill="currentColor"/></svg>
+      <img src="{% static 'img/grin.svg' %}" alt="" width="34" height="34">
       <span>{{ SITE_NAME }}</span>
     </a>
     {% with section=request.resolver_match.namespace page=request.resolver_match.url_name %}
