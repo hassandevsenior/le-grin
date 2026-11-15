@@ -82,6 +82,12 @@ class AccountTests(GrinTestCase):
         self.assertIn("default-src 'self'", response["Content-Security-Policy"])
 
 
+class StarterDebateTests(TestCase):
+    def test_home_shows_the_starter_debate(self):
+        page = self.client.get(reverse("core:home"))
+        self.assertContains(page, "L&#x27;IA va-t-elle remplacer les développeurs ?")
+
+
 class DebateTests(GrinTestCase):
     def setUp(self):
         super().setUp()
