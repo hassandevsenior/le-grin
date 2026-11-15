@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% load grin %}
 {% block title %}{{ project.title }} · {{ SITE_NAME }}{% endblock %}
-{% block description %}{{ project.tagline }}{% endblock %}
+{% block description %}{% firstof project.tagline project.title %}{% endblock %}
 {% block content %}
 <section class="wrap page">
+  {% url 'projects:list' as wall_url %}{% include "_back.html" with url=wall_url label="Le mur" %}
   <header class="project-head">
     <div>
       <p class="eyebrow"><a href="{% url 'projects:list' %}">Le mur</a> · <span class="stage stage-{{ project.stage }}">{{ project.get_stage_display }}</span></p>
       <h1>{{ project.title }}</h1>
-      <p class="lead">{{ project.tagline }}</p>
+      {% if project.tagline %}<p class="lead">{{ project.tagline }}</p>{% endif %}
       <p class="byline">
         <a class="who" href="{{ project.owner.get_absolute_url }}">{% include "_avatar.html" with member=project.owner size="xs" %}{{ project.owner.username }}</a>
         <span class="muted">· accroché il y a {{ project.created|timesince }}</span>
@@ -27,7 +28,7 @@
   <div class="board-wrap">
     <div class="board" data-board data-create-url="{% url 'projects:pin_create' project.slug %}" data-owner="{{ is_owner|yesno:'1,0' }}">
       <div class="board-bar">
-        <span class="shot-bar"><i></i><i></i><i></i><em>{% if project.live_url %}{{ project.live_url|host }}{% else %}{{ project.repo_url|host }}{% endif %}</em></span>
+        <span class="shot-bar"><i></i><i></i><i></i><em>{% if project.live_url %}{{ project.live_url|host }}{% elif project.repo_url %}{{ project.repo_url|host }}{% else %}{{ project.title|lower }}{% endif %}</em></span>
         <button type="button" class="btn btn-small btn-primary" data-pin-toggle aria-pressed="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
           <span data-pin-toggle-label>Poser un retour</span>
@@ -74,7 +75,7 @@
       {% if help_requests %}
         <h2>Ce projet cherche du renfort</h2>
         {% for item in help_requests %}
-          <a class="row-card" href="{{ item.get_absolute_url }}"><span class="chip chip-size">{{ item.get_size_display }}</span><strong>{{ item.title }}</strong></a>
+          <a class="row-card" href="{{ item.get_absolute_url }}"><span class="chip chip-size" title="Taille du chantier">Chantier : {{ item.get_size_display|lower }}</span><strong>{{ item.title }}</strong></a>
         {% endfor %}
       {% endif %}
     </div>

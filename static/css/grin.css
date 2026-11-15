@@ -423,3 +423,26 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 
 /* Chiffres alignés dans les compteurs. */
 .counts, .counter, .hero-stats b, .person-stats, .vote-option b, .scores dd { font-variant-numeric: tabular-nums; }
+
+/* ---------- Flèche retour ---------- */
+.back { display: inline-flex; align-items: center; gap: .3rem; margin: -1rem 0 1.2rem -.5rem; padding: .3rem .75rem .3rem .45rem; border-radius: 999px;
+  color: var(--muted); font-size: .9rem; font-weight: 600; text-decoration: none; transition: background .12s, color .12s; }
+.back:hover { background: var(--sunken); color: var(--accent); }
+.back svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .15s; }
+.back:hover svg { transform: translateX(-3px); }
+
+/* ---------- Mot de passe : œil ---------- */
+.pw { position: relative; display: block; }
+.pw input { padding-right: 3rem; width: 100%; }
+.pw-eye { all: unset; position: absolute; right: .35rem; top: 50%; translate: 0 -50%; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; color: var(--muted); }
+.pw-eye:hover { background: var(--sunken); color: var(--ink); }
+.pw-eye:focus-visible { outline: 3px solid var(--accent); outline-offset: 0; }
+.pw-eye svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Projet sans interface : sortie de terminal ---------- */
+.no-gui { border: 1px solid var(--line); border-radius: var(--radius); padding: .2rem 1rem; background: var(--surface); }
+.no-gui[open] { padding-bottom: 1rem; }
+.no-gui summary { cursor: pointer; padding: .7rem 0; font-weight: 600; }
+.no-gui summary .muted { font-weight: 400; font-size: .9rem; margin-left: .3rem; }
+textarea.mono { font-family: var(--mono); font-size: .88rem; line-height: 1.5; background: #0e140b; color: #dcecd0; border-color: #2a3a22; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

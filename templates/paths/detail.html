@@ -3,6 +3,7 @@
 {% block title %}{{ path.title }} · {{ SITE_NAME }}{% endblock %}
 {% block content %}
 <section class="wrap page narrow-wide">
+  {% url 'paths:list' as list_url %}{% include "_back.html" with url=list_url label="Parcours" %}
   <p class="eyebrow"><a href="{% url 'paths:list' %}">Parcours</a>{% if path.tech %} · {{ path.tech.name }}{% endif %}</p>
   <h1>{{ path.title }}</h1>
   <p class="byline">
@@ -59,7 +60,7 @@
           <p class="empty empty-small">Personne n'a encore expliqué cette étape.</p>
         {% endfor %}
 
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and not is_author %}
         <details class="reveal">
           <summary>Expliquer cette étape</summary>
           <form method="post" action="{% url 'paths:explain' step.pk %}" class="form">
@@ -76,11 +77,13 @@
       </div>
     </li>
     {% empty %}
-    <li class="empty">Le chemin n'est pas encore tracé. Par quoi faut-il commencer ? Propose la première étape.</li>
+    <li class="empty">{% if is_author %}Le chemin n'est pas encore tracé. Tu n'as rien à faire : les membres qui connaissent le sujet vont proposer les étapes, et tu seras prévenu à chaque nouvelle.{% else %}Le chemin n'est pas encore tracé. Par quoi faut-il commencer ? Propose la première étape.{% endif %}</li>
     {% endfor %}
   </ol>
 
-  {% if can_add_step %}
+  {% if is_author %}
+    {% if steps %}<p class="muted small">Ce sont les membres qui tracent ton chemin. Toi, avance étape par étape et coche « Franchie » au fur et à mesure.</p>{% endif %}
+  {% elif can_add_step %}
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'paths:add_step' path.pk %}" class="card form add-step">
       {% csrf_token %}

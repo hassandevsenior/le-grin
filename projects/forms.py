@@ -3,7 +3,7 @@ from django.utils.text import slugify
 
 from accounts.forms import TechsMixin
 
-from .images import process_screenshot
+from .images import process_screenshot, render_terminal
 from .models import Pin, Project
 
 
@@ -17,6 +17,16 @@ def unique_slug(title):
 
 
 class ProjectForm(TechsMixin, forms.ModelForm):
+    terminal = forms.CharField(
+        label="Pas d'interface graphique ?",
+        required=False,
+        max_length=4000,
+        widget=forms.Textarea(attrs={"rows": 8, "spellcheck": "false", "class": "mono",
+                                     "placeholder": "$ sugu sync --depuis hier\n✔ 128 ventes synchronisées en 2,4 s"}),
+        help_text="Une API, une bibliothèque, un outil en ligne de commande ? Colle une sortie de terminal "
+                  "ou un extrait de code : on en fait l'image du projet, et les retours s'y posent comme sur une capture.",
+    )
+
     class Meta:
         model = Project
         fields = ["screenshot", "title", "tagline", "live_url", "repo_url", "stage", "description"]
@@ -26,6 +36,7 @@ class ProjectForm(TechsMixin, forms.ModelForm):
         }
         help_texts = {
             "tagline": "Ce que ça fait, pour qui.",
+            "live_url": "Le site, l'app sur le store, la page du paquet…",
             "repo_url": "S'il est public.",
             "description": "Pourquoi tu l'as construit, ce qui a été dur, ce qui reste à faire.",
         }
@@ -33,6 +44,7 @@ class ProjectForm(TechsMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["techs_text"].label = "Construit avec"
+        self.fields["screenshot"].required = False  # une sortie de terminal peut la remplacer (voir clean)
         self.init_techs()
 
     def clean_screenshot(self):
@@ -44,8 +56,15 @@ class ProjectForm(TechsMixin, forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-        if not data.get("live_url") and not data.get("repo_url"):
-            raise forms.ValidationError("Donne au moins un lien : le projet en ligne ou son dépôt Git.")
+        terminal = (data.get("terminal") or "").strip("\n")
+        has_new_file = hasattr(self.files.get("screenshot"), "content_type")
+        if terminal.strip() and not has_new_file:
+            data["screenshot"] = render_terminal(terminal)
+        elif not data.get("screenshot") and not self.errors.get("screenshot"):
+            self.add_error(
+                "screenshot",
+                "Ajoute une capture d'écran. Pas d'interface ? Colle plutôt une sortie de terminal juste en dessous.",
+            )
         return data
 
     def save(self, owner=None):

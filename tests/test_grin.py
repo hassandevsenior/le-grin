@@ -139,9 +139,23 @@ class ProjectTests(GrinTestCase):
         self.assertEqual(Project.objects.count(), 0)
         self.assertEqual(response.status_code, 200)
 
-    def test_needs_at_least_one_link(self):
-        response = self.make_project(repo_url="")
-        self.assertContains(response, "Donne au moins un lien")
+    def test_only_screenshot_and_name_are_required(self):
+        response = self.make_project(repo_url="", tagline="", techs_text="")
+        project = Project.objects.get()
+        self.assertRedirects(response, project.get_absolute_url())
+        self.assertContains(self.client.get(reverse("projects:list")), "sugu")  # nom affiché à la place du lien
+
+    def test_screenshot_or_terminal_is_required(self):
+        response = self.make_project(screenshot="")
+        self.assertContains(response, "Ajoute une capture")
+        self.assertEqual(Project.objects.count(), 0)
+
+    def test_terminal_output_becomes_the_screenshot(self):
+        response = self.make_project(screenshot="", terminal="$ sugu sync\n✔ 128 ventes synchronisées\n" + "x" * 300)
+        project = Project.objects.get()
+        self.assertRedirects(response, project.get_absolute_url())
+        with Image.open(project.screenshot.path) as image:
+            self.assertEqual((image.format, image.width), ("WEBP", 1440))
 
     def test_slugs_are_unique(self):
         self.make_project()
@@ -286,6 +300,21 @@ class PathTests(GrinTestCase):
         self.client.force_login(self.awa)
         self.assertEqual(self.client.post(thank).json(), {"active": True, "count": 1})
         self.assertEqual(self.client.get(self.path.get_absolute_url()).status_code, 200)
+
+    def test_path_author_does_not_trace_steps(self):
+        self.client.force_login(self.awa)
+        page = self.client.get(self.path.get_absolute_url())
+        self.assertNotContains(page, "Ajouter l'étape")
+        self.assertContains(page, "Tu n'as rien à faire")
+        self.add_step()
+        self.assertEqual(self.path.steps.count(), 0)
+        self.client.force_login(self.issa)
+        self.add_step()
+        step = Step.objects.get()
+        self.client.force_login(self.awa)
+        self.assertNotContains(self.client.get(self.path.get_absolute_url()), "Expliquer cette étape")
+        self.client.post(reverse("paths:explain", args=[step.pk]), {"summary": "x" * 60})
+        self.assertEqual(step.explanations.count(), 0)
 
     def test_only_path_author_reorders(self):
         self.client.force_login(self.issa)

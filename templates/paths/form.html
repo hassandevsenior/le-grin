@@ -2,6 +2,7 @@
 {% block title %}Je veux apprendre · {{ SITE_NAME }}{% endblock %}
 {% block content %}
 <section class="wrap page narrow">
+  {% url 'paths:list' as list_url %}{% include "_back.html" with url=list_url label="Parcours" %}
   <header class="page-head"><div><h1>Qu'est-ce que tu veux apprendre ?</h1><p>Pas besoin de savoir par où commencer : c'est justement ce que la communauté va tracer pour toi.</p></div></header>
   <form method="post" class="card form" novalidate>
     {% csrf_token %}

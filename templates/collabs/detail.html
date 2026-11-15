@@ -3,12 +3,13 @@
 {% block content %}
 <section class="wrap page two-col">
   <article>
+    {% url 'collabs:list' as list_url %}{% include "_back.html" with url=list_url label="Coups de main" %}
     <p class="eyebrow"><a href="{% url 'collabs:list' %}">Coups de main</a> · {% if help_request.is_open %}Demande ouverte{% else %}Résolu{% endif %}</p>
     <h1>{{ help_request.title }}</h1>
     <p class="byline">
       <a class="who" href="{{ help_request.author.get_absolute_url }}">{% include "_avatar.html" with member=help_request.author size="xs" %}{{ help_request.author.username }}</a>
       <span class="muted">· il y a {{ help_request.created|timesince }}</span>
-      <span class="chip chip-size">{{ help_request.get_size_display }}</span>
+      <span class="chip chip-size" title="Taille du chantier">Chantier : {{ help_request.get_size_display|lower }}</span>
     </p>
     <div class="prose">{{ help_request.details|urlize|linebreaks }}</div>
     <p class="stack">

@@ -58,7 +58,7 @@ def create(request):
     form = PathForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         path = form.save(author=request.user)
-        messages.success(request, "C'est lancé. La communauté peut maintenant tracer les étapes.")
+        messages.success(request, "C'est lancé. Les membres vont tracer les étapes pour toi : tu seras prévenu à chaque nouvelle.")
         return redirect(path)
     return render(request, "paths/form.html", {"form": form})
 
@@ -67,6 +67,9 @@ def create(request):
 @require_POST
 def add_step(request, pk):
     path = get_object_or_404(Path, pk=pk)
+    if path.author == request.user:
+        messages.error(request, "Ce sont les membres qui tracent ton parcours : tu n'as pas à proposer d'étapes.")
+        return redirect(path)
     form = StepForm(request.POST)
     if not form.is_valid():
         messages.error(request, "Donne un titre à l'étape.")
@@ -116,8 +119,11 @@ def delete_step(request, pk):
 @require_POST
 def add_explanation(request, pk):
     step = get_object_or_404(Step.objects.select_related("path"), pk=pk)
-    form = ExplanationForm(request.POST)
     anchor = f"{step.path.get_absolute_url()}#etape-{step.pk}"
+    if step.path.author == request.user:
+        messages.error(request, "Tu as demandé ce parcours : ce sont les autres membres qui expliquent les étapes.")
+        return redirect(anchor)
+    form = ExplanationForm(request.POST)
     if not form.is_valid():
         messages.error(request, next(iter(form.errors.values()))[0])
         return redirect(anchor)

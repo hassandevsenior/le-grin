@@ -2,6 +2,7 @@
 {% block title %}{{ debate.question }} · {{ SITE_NAME }}{% endblock %}
 {% block content %}
 <section class="wrap page narrow-wide">
+  {% url 'debates:list' as list_url %}{% include "_back.html" with url=list_url label="Débats" %}
   <p class="eyebrow"><a href="{% url 'debates:list' %}">Débats</a></p>
   <h1>{{ debate.question }}</h1>
   {% if debate.intro %}<p class="lead">{{ debate.intro }}</p>{% endif %}

@@ -109,6 +109,44 @@
     });
   });
 
+  // Œil pour afficher ou masquer le mot de passe pendant la saisie.
+  const EYE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.700 9.700 0 0 0 5.400-1.600"/><path d="M9.900 9.900a3 3 0 0 0 4.200 4.200"/></svg>';
+  $$("input[type=password]").forEach((input) => {
+    const wrap = document.createElement("span");
+    wrap.className = "pw";
+    input.replaceWith(wrap);
+    wrap.append(input);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "pw-eye";
+    const sync = () => {
+      const shown = input.type === "text";
+      button.innerHTML = shown ? EYE_OFF : EYE;
+      button.setAttribute("aria-label", shown ? "Masquer le mot de passe" : "Afficher le mot de passe");
+      button.setAttribute("aria-pressed", String(shown));
+    };
+    button.addEventListener("click", () => {
+      input.type = input.type === "password" ? "text" : "password";
+      sync();
+      input.focus();
+    });
+    // Le mot de passe ne reste jamais affiché au moment d'envoyer le formulaire.
+    input.form?.addEventListener("submit", () => { input.type = "password"; });
+    sync();
+    wrap.append(button);
+  });
+
+  // Flèche retour : revient en arrière si l'on vient du site, sinon suit le lien vers la liste.
+  $$("[data-back]").forEach((link) => link.addEventListener("click", (event) => {
+    let fromHere = false;
+    try { fromHere = new URL(document.referrer).origin === location.origin; } catch { /* pas de référent */ }
+    if (fromHere && history.length > 1) {
+      event.preventDefault();
+      history.back();
+    }
+  }));
+
   // Compteur discret sur les zones de texte limitées.
   $$("textarea[maxlength]").forEach((area) => {
     const label = area.id && $(`label[for="${area.id}"]`);

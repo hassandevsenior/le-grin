@@ -2,10 +2,11 @@
 {% block title %}{% if project %}Modifier {{ project.title }}{% else %}Accrocher un projet{% endif %} · {{ SITE_NAME }}{% endblock %}
 {% block content %}
 <section class="wrap page narrow">
+  {% if project %}{% include "_back.html" with url=project.get_absolute_url label=project.title %}{% else %}{% url 'projects:list' as wall_url %}{% include "_back.html" with url=wall_url label="Le mur" %}{% endif %}
   <header class="page-head">
     <div>
       <h1>{% if project %}Modifier {{ project.title }}{% else %}Accroche ton projet au mur{% endif %}</h1>
-      <p>Ici on montre avant d'expliquer : la capture d'écran passe en premier. Une app mobile, un outil en ligne de commande ? Une capture de l'écran principal ou du terminal fait l'affaire.</p>
+      <p>Ici on montre avant d'expliquer : seuls la capture et le nom sont demandés, le reste est facultatif. Pas d'interface graphique ? Colle une sortie de terminal, on en fait l'image du projet.</p>
     </div>
   </header>
   <form method="post" enctype="multipart/form-data" class="card form" novalidate>
@@ -22,7 +23,15 @@
       {% if form.screenshot.errors %}<p class="field-error" role="alert">{{ form.screenshot.errors.0 }}</p>{% endif %}
     </div>
 
-    {% for field in form.visible_fields %}{% if field.name != "screenshot" %}
+    <details class="no-gui field{% if form.terminal.errors %} has-error{% endif %}" {% if form.terminal.value or form.terminal.errors %}open{% endif %}>
+      <summary>{{ form.terminal.label }} <span class="muted">Colle une sortie de terminal à la place</span></summary>
+      <label class="sr-only" for="{{ form.terminal.id_for_label }}">Sortie de terminal ou extrait de code</label>
+      {{ form.terminal }}
+      {% if form.terminal.errors %}<p class="field-error" role="alert">{{ form.terminal.errors.0 }}</p>
+      {% else %}<p class="field-help">{{ form.terminal.help_text }}{% if project %} Si tu en colles une, elle remplacera la capture actuelle.{% endif %}</p>{% endif %}
+    </details>
+
+    {% for field in form.visible_fields %}{% if field.name != "screenshot" and field.name != "terminal" %}
       <div class="field{% if field.errors %} has-error{% endif %}">
         <label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <small>facultatif</small>{% endif %}</label>
         {{ field }}

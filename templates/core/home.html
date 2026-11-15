@@ -55,7 +55,7 @@
     </header>
     {% for item in help_requests %}
       <a class="row-card" href="{{ item.get_absolute_url }}">
-        <span class="chip chip-size">{{ item.get_size_display }}</span>
+        <span class="chip chip-size" title="Taille du chantier">Chantier : {{ item.get_size_display|lower }}</span>
         <strong>{{ item.title }}</strong>
         <small>{{ item.author.username }} · il y a {{ item.created|timesince }}</small>
       </a>

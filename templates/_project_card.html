@@ -1,12 +1,12 @@
 {% load grin %}
 <article class="shot-card">
   <a class="shot" href="{{ project.get_absolute_url }}" aria-label="{{ project.title }}">
-    <span class="shot-bar"><i></i><i></i><i></i><em>{% if project.live_url %}{{ project.live_url|host }}{% else %}{{ project.repo_url|host }}{% endif %}</em></span>
+    <span class="shot-bar"><i></i><i></i><i></i><em>{% if project.live_url %}{{ project.live_url|host }}{% elif project.repo_url %}{{ project.repo_url|host }}{% else %}{{ project.title|lower }}{% endif %}</em></span>
     <span class="shot-view"><img src="{{ project.screenshot.url }}" alt="Capture de {{ project.title }}" loading="lazy"></span>
   </a>
   <div class="shot-meta">
     <h3><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></h3>
-    <p>{{ project.tagline }}</p>
+    {% if project.tagline %}<p>{{ project.tagline }}</p>{% endif %}
     <div class="shot-foot">
       <a class="who" href="{{ project.owner.get_absolute_url }}">{% include "_avatar.html" with member=project.owner size="xs" %}{{ project.owner.username }}</a>
       <span class="counts">

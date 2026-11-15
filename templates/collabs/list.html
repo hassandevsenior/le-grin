@@ -15,7 +15,7 @@
     {% for item in requests %}
       <a class="card help-card{% if not item.is_open %} is-closed{% endif %}" href="{{ item.get_absolute_url }}">
         <p class="help-top">
-          <span class="chip chip-size">{{ item.get_size_display }}</span>
+          <span class="chip chip-size" title="Taille du chantier">Chantier : {{ item.get_size_display|lower }}</span>
           {% if not item.is_open %}<span class="chip chip-kept">Résolu</span>
           {% elif item.helpers %}<span class="chip chip-active">{{ item.helpers }} engagé{{ item.helpers|pluralize }}</span>
           {% else %}<span class="chip chip-waiting">Attend du renfort</span>{% endif %}

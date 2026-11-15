@@ -15,7 +15,7 @@ class Project(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
     title = models.CharField("nom du projet", max_length=60)
     slug = models.SlugField(max_length=70, unique=True)
-    tagline = models.CharField("en une phrase", max_length=120)
+    tagline = models.CharField("en une phrase", max_length=120, blank=True)
     description = models.TextField("l'histoire du projet", max_length=2000, blank=True)
     screenshot = models.ImageField("capture d'écran", upload_to="captures/%Y/%m/")
     live_url = models.URLField("lien du projet", blank=True)
