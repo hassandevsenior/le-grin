@@ -1,9 +1,62 @@
 {% extends "base.html" %}
-{% block title %}Page introuvable · {{ SITE_NAME }}{% endblock %}
+{% block title %}Page introuvable (404) · {{ SITE_NAME }}{% endblock %}
+{% block description %}Cette page est introuvable ou a quitté le grin. Retrouve le mur des projets, les coups de main, les parcours et les débats.{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
 {% block content %}
-<section class="wrap page narrow lost">
-  <h1>Cette page a quitté le grin.</h1>
-  <p class="lead">Le lien est peut-être ancien, ou le contenu a été retiré par son auteur.</p>
-  <p><a class="btn btn-primary" href="/">Retour à l'accueil</a></p>
+<section class="wrap page lost-page">
+  <div class="card lost-card">
+    <div class="lost-art" aria-hidden="true">
+      <svg viewBox="0 0 180 110" width="160" height="98">
+        <rect x="8" y="12" width="164" height="86" rx="22" fill="var(--accent-soft)" stroke="var(--line)" stroke-width="2"/>
+        <g transform="translate(26, 22) scale(1.05)" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M52 12.5 C53 7 56 4 60.5 4.5" fill="none" stroke="#174a0c" stroke-width="4.2"/>
+          <path d="M4 54 C14 64 56 50 52 12 C42 9 17 32 4 54Z" fill="#3a9f22" stroke="#174a0c" stroke-width="2.4"/>
+          <path d="M9 50 C24 38 42 22 49 16 C50 40 20 60 9 50Z" fill="#d6f6b6" stroke="#174a0c" stroke-width="1.5"/>
+          <circle cx="17.4" cy="47.0" r="5.3" fill="#63d134" stroke="#174a0c" stroke-width="1.5"/>
+          <circle cx="28.6" cy="39.4" r="6.6" fill="#63d134" stroke="#174a0c" stroke-width="1.5"/>
+          <circle cx="39.7" cy="29.6" r="6.6" fill="none" stroke="#174a0c" stroke-width="1.6" stroke-dasharray="3 2.5"/>
+          <path d="M9 50 C18 55 48 32 49 16 C51 40 20 60 9 50Z" fill="#86dd52" stroke="#174a0c" stroke-width="1.5"/>
+        </g>
+        <path d="M92 48 C108 32 124 36 134 54" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>
+        <circle cx="142" cy="64" r="10" fill="#63d134" stroke="#174a0c" stroke-width="2"/>
+        <ellipse cx="139" cy="61" rx="3" ry="2" transform="rotate(-30 139 61)" fill="#fff"/>
+      </svg>
+      <span class="lost-code">Erreur 404</span>
+    </div>
+
+    <h1>Ce petit pois a roulé hors du grin.</h1>
+    <p class="lead">L'adresse demandée (<code>{{ request.path }}</code>) n'existe pas, a changé de place ou a été retirée par son auteur.</p>
+
+    <form class="lost-search" action="{% url 'projects:list' %}" method="get" role="search" aria-label="Rechercher un projet sur le mur">
+      <label class="sr-only" for="lost-q">Chercher un projet sur le mur</label>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.2-4.2"/></svg>
+        <input type="search" id="lost-q" name="q" placeholder="Chercher un projet, une techno, un membre…">
+      </div>
+      <button type="submit" class="btn btn-primary">Chercher au mur</button>
+    </form>
+
+    <nav class="lost-links" aria-label="Raccourcis vers les rubriques principales">
+      <a class="btn" href="{% url 'core:home' %}">Retour à l'accueil</a>
+      <a class="btn" href="{% url 'projects:list' %}">Le mur des projets</a>
+      <a class="btn" href="{% url 'collabs:list' %}">Coups de main</a>
+      <a class="btn" href="{% url 'paths:list' %}">Parcours</a>
+      <a class="btn" href="{% url 'debates:list' %}">Débats</a>
+    </nav>
+  </div>
+
+  {% if recent_projects %}
+  <div class="block">
+    <header class="block-head">
+      <div>
+        <h2>Pendant que tu es là : derniers projets au mur</h2>
+        <p>Jette un œil à ce que les membres ont accroché récemment.</p>
+      </div>
+      <a class="more" href="{% url 'projects:list' %}">Voir tout le mur</a>
+    </header>
+    <div class="wall" data-wall>{% for project in recent_projects %}{% include "_project_card.html" %}{% endfor %}</div>
+  </div>
+  {% endif %}
 </section>
 {% endblock %}
+

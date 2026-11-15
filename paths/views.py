@@ -2,13 +2,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Count, Max, Prefetch
+from django.db.models import Count, Max, Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from core.http import api_post, toggle_membership
-from core.models import notify
+from core.models import Tech, notify
 
 from .forms import ExplanationForm, PathForm, StepForm
 from .models import MAX_STEPS, Explanation, Path, Step
@@ -19,10 +19,38 @@ def path_list(request):
         step_count=Count("steps", distinct=True),
         explanation_count=Count("steps__explanations", distinct=True),
     ).order_by("-created")
-    show = request.GET.get("voir", "")
+    query = request.GET.get("q", "").strip()
+    tech = request.GET.get("tech", "").strip()
+    show = request.GET.get("voir", "").strip()
+    if show != "a-tracer":
+        show = ""
     if show == "a-tracer":
         paths = paths.filter(step_count__lt=3)
-    return render(request, "paths/list.html", {"paths": paths[:60], "show": show})
+    if tech:
+        paths = paths.filter(tech__slug=tech)
+    if query:
+        paths = paths.filter(
+            Q(title__icontains=query)
+            | Q(context__icontains=query)
+            | Q(tech__name__icontains=query)
+            | Q(author__username__icontains=query)
+        )
+    items = list(paths[:60])
+    active_tech = Tech.objects.filter(slug=tech).first() if tech else None
+    return render(
+        request,
+        "paths/list.html",
+        {
+            "paths": items,
+            "total_count": len(items),
+            "query": query,
+            "tech": tech,
+            "active_tech": active_tech,
+            "show": show,
+            "has_filters": bool(query or tech or show),
+            "techs": Tech.objects.annotate(n=Count("paths")).filter(n__gt=0).order_by("-n")[:12],
+        },
+    )
 
 
 def detail(request, pk):

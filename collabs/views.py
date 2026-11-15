@@ -18,12 +18,41 @@ def request_list(request):
     requests = HelpRequest.objects.select_related("author", "project").annotate(
         helpers=Count("commitments", filter=running, distinct=True)
     ).order_by("-is_open", "-created")
-    show = request.GET.get("voir", "")
+    query = request.GET.get("q", "").strip()
+    size = request.GET.get("taille", "").strip()
+    show = request.GET.get("voir", "").strip()
+    if show not in ("sans-renfort", "tout"):
+        show = ""
     if show == "sans-renfort":
         requests = requests.filter(is_open=True, helpers=0)
     elif show != "tout":
         requests = requests.filter(is_open=True)
-    return render(request, "collabs/list.html", {"requests": requests[:60], "show": show})
+    if size in HelpRequest.Size.values:
+        requests = requests.filter(size=size)
+    else:
+        size = ""
+    if query:
+        requests = requests.filter(
+            Q(title__icontains=query)
+            | Q(details__icontains=query)
+            | Q(author__username__icontains=query)
+            | Q(project__title__icontains=query)
+        )
+    items = list(requests[:60])
+    return render(
+        request,
+        "collabs/list.html",
+        {
+            "requests": items,
+            "total_count": len(items),
+            "query": query,
+            "size": size,
+            "sizes": HelpRequest.Size.choices,
+            "active_size_label": dict(HelpRequest.Size.choices).get(size, ""),
+            "show": show,
+            "has_filters": bool(query or size or show),
+        },
+    )
 
 
 def detail(request, pk):

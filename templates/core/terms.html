@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Conditions Générales d'Utilisation (CGU) · {{ SITE_NAME }}{% endblock %}
+{% block description %}Les règles simples et bienveillantes qui régissent l'utilisation de la plateforme communautaire Le Grin pour les développeurs.{% endblock %}
+{% block content %}
+<section class="wrap page narrow-wide legal">
+  {% url 'core:home' as home_url %}{% include "_back.html" with url=home_url label="Accueil" %}
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">Règles de vie commune</p>
+      <h1>Conditions Générales d'Utilisation</h1>
+      <p>Dernière mise à jour : 15 novembre 2026 · En vigueur sur <code>legrin.nanema.tech</code>.</p>
+    </div>
+  </header>
+
+  <div class="card legal-card prose">
+    <p class="legal-highlight"><strong>L'esprit du Grin :</strong> Au Burkina Faso comme ailleurs, le grin est un cercle ouvert où l'on se parle franchement et avec respect. Que tu écrives ta première ligne de code ou que tu déploies depuis dix ans, chacun y a la même dignité.</p>
+
+    <h2>1. Objet de la plateforme</h2>
+    <p><strong>{{ SITE_NAME }}</strong> est une plateforme communautaire gratuite destinée aux développeuses, développeurs et apprenants du numérique. Elle permet de :</p>
+    <ul>
+      <li>Présenter ses réalisations sur <strong>Le mur</strong> et recevoir des retours constructifs épinglés sur des captures d'écran ou sorties de terminal ;</li>
+      <li>Demander ou offrir de l'aide ponctuelle via les <strong>Coups de main</strong>, sur la base d'engagements limités dans le temps ;</li>
+      <li>Construire et suivre collectivement des <strong>Parcours</strong> d'apprentissage découpés en étapes résumées ;</li>
+      <li>Échanger des arguments nuancés au sein des <strong>Débats</strong> techniques.</li>
+    </ul>
+
+    <h2>2. Accès au service et création de compte</h2>
+    <p>La lecture des contenus publics est libre. La publication d'un projet, d'un retour, d'un parcours, d'un coup de main ou d'un argument requiert la création d'un compte gratuit. Tu t'engages à fournir des informations exactes, à ne créer qu'un compte par personne sauf besoin légitime, et à préserver la confidentialité de ton mot de passe.</p>
+
+    <h2>3. Code de conduite et bienveillance</h2>
+    <p>En participant au Grin, tu t'engages à :</p>
+    <ul>
+      <li><strong>Critiquer le code ou l'interface, jamais la personne :</strong> un retour « Souci » ou « Idée » sur le mur doit rester précis, utile et respectueux ;</li>
+      <li><strong>Tenir parole ou prévenir :</strong> lorsque tu t'engages sur un coup de main pour une durée choisie, tu peux à tout moment utiliser le bouton « Me libérer » si un imprévu survient, plutôt que de laisser l'auteur sans nouvelles ;</li>
+      <li><strong>Partager du savoir réel :</strong> sur les parcours, les résumés doivent expliquer concrètement l'étape avec tes propres mots (les simples liens promotionnels ou le copier-coller massif sans valeur pédagogique sont refusés) ;</li>
+      <li><strong>Ne publier aucun contenu illicite ou nuisible :</strong> sont strictement interdits le harcèlement, les propos haineux ou discriminatoires, la divulgation de secrets/clés d'API ou données personnelles de tiers, le spam, l'usurpation d'identité et le téléversement de fichiers malveillants.</li>
+    </ul>
+
+    <h2>4. Propriété intellectuelle des contenus publiés</h2>
+    <p><strong>Tu restes pleinement propriétaire de tes créations.</strong> Chaque membre conserve l'intégralité de ses droits d'auteur sur ses projets, son code, ses captures d'écran et ses textes.</p>
+    <p>En publiant un contenu sur {{ SITE_NAME }}, tu garantis disposer des droits nécessaires et tu accordes à la plateforme une licence gratuite, non exclusive et révocable permettant d'héberger, de compresser techniquement (conversion WebP des captures) et d'afficher ce contenu sur le site tant que tu ne le retires pas.</p>
+
+    <h2>5. Modération et disponibilité</h2>
+    <p>L'équipe d'administration se réserve le droit de retirer sans préavis tout contenu contrevenant aux présentes CGU ou à la loi, et de suspendre un compte en cas d'abus répété ou de tentative d'atteinte à la sécurité du serveur.</p>
+    <p>{{ SITE_NAME }} est fourni « en l'état » à titre gratuit. Nous mettons tout en œuvre pour assurer sa sécurité et sa disponibilité continue, sans pouvoir garantir une absence totale d'interruption pour maintenance.</p>
+
+    <h2>6. Données personnelles et cookies</h2>
+    <p>Le traitement de tes données personnelles et le fonctionnement des cookies techniques sont détaillés dans notre <a href="{% url 'core:privacy' %}">Politique de confidentialité</a>, qui fait partie intégrante des présentes conditions.</p>
+
+    <h2>7. Droit applicable et contact</h2>
+    <p>Les présentes CGU sont régies par le droit burkinabè. En cas de question ou de signalement d'un contenu inapproprié, tu peux écrire à <code>contact@nanema.tech</code>.</p>
+  </div>
+</section>
+{% endblock %}

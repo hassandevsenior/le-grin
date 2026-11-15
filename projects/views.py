@@ -39,29 +39,67 @@ def project_list(request):
         pin_count=Count("pins", distinct=True), clap_count=Count("applause", distinct=True)
     )
     query = request.GET.get("q", "").strip()
-    tech = request.GET.get("tech", "")
-    stage = request.GET.get("etat", "")
-    sort = request.GET.get("tri", "")
+    tech = request.GET.get("tech", "").strip()
+    stage = request.GET.get("etat", "").strip()
+    sort = request.GET.get("tri", "").strip()
     if query:
-        projects = projects.filter(Q(title__icontains=query) | Q(tagline__icontains=query))
+        projects = projects.filter(
+            Q(title__icontains=query)
+            | Q(tagline__icontains=query)
+            | Q(description__icontains=query)
+            | Q(owner__username__icontains=query)
+        )
     if tech:
         projects = projects.filter(techs__slug=tech)
     if stage in Project.Stage.values:
         projects = projects.filter(stage=stage)
+    else:
+        stage = ""
     if sort == "retours":
         # Ceux qui attendent encore des retours passent devant.
         projects = projects.order_by("pin_count", "-created")
     elif sort == "bravos":
         projects = projects.order_by("-clap_count", "-created")
     else:
+        sort = ""
         projects = projects.order_by("-created")
-    page = Paginator(projects, 12).get_page(request.GET.get("page"))
+    paginator = Paginator(projects, 12)
+    page = paginator.get_page(request.GET.get("page"))
+
+    if request.GET.get("fragment") == "1":
+        from django.template.loader import render_to_string
+
+        cards_html = "".join(
+            render_to_string("_project_card.html", {"project": item}, request=request)
+            for item in page.object_list
+        )
+        next_url = ""
+        if page.has_next():
+            params = request.GET.copy()
+            params.pop("fragment", None)
+            params["page"] = page.next_page_number()
+            next_url = f"{request.path}?{params.urlencode()}"
+        return JsonResponse(
+            {
+                "html": cards_html,
+                "has_next": page.has_next(),
+                "next_url": next_url,
+                "page": page.number,
+                "num_pages": paginator.num_pages,
+            }
+        )
+
+    active_tech = Tech.objects.filter(slug=tech).first() if tech else None
     context = {
         "page": page,
+        "total_count": paginator.count,
         "query": query,
         "tech": tech,
+        "active_tech": active_tech,
         "stage": stage,
+        "active_stage_label": dict(Project.Stage.choices).get(stage, ""),
         "sort": sort,
+        "has_filters": bool(query or tech or stage or sort),
         "stages": Project.Stage.choices,
         "techs": Tech.objects.annotate(n=Count("projects")).filter(n__gt=0).order_by("-n")[:12],
     }
@@ -73,6 +111,7 @@ def detail(request, slug):
     pins = project.pins.select_related("author")
     context = {
         "project": project,
+        "og_image_url": request.build_absolute_uri(project.screenshot.url),
         "pins": pins,
         "pins_data": [pin_payload(pin, request.user) for pin in pins],
         "clap_count": project.applause.count(),

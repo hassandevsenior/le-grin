@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Politique de confidentialité · {{ SITE_NAME }}{% endblock %}
+{% block description %}Comment Le Grin protège tes données personnelles : aucune revente, aucun traceur externe, captures nettoyées de leurs métadonnées et contrôle total sur ton compte.{% endblock %}
+{% block content %}
+<section class="wrap page narrow-wide legal">
+  {% url 'core:home' as home_url %}{% include "_back.html" with url=home_url label="Accueil" %}
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">Transparence &amp; vie privée</p>
+      <h1>Politique de confidentialité</h1>
+      <p>Dernière mise à jour : 15 novembre 2026 · Applicable au domaine <code>legrin.nanema.tech</code>.</p>
+    </div>
+  </header>
+
+  <div class="card legal-card prose">
+    <p class="legal-highlight"><strong>En bref :</strong> Le Grin ne vend aucune donnée, n'affiche aucune publicité et ne charge aucune ressource depuis des serveurs tiers (ni Google Fonts, ni CDN externe, ni outil de pistage). Tout reste sur notre serveur.</p>
+
+    <h2>1. Responsable du traitement</h2>
+    <p>La plateforme communautaire <strong>{{ SITE_NAME }}</strong> (<code>https://legrin.nanema.tech</code>), conçue dans le cadre du concours CADEV 2026 pour rassembler et faire progresser les développeuses et développeurs, agit en qualité de responsable du traitement des données personnelles collectées sur ce site.</p>
+
+    <h2>2. Quelles données collectons-nous ?</h2>
+    <p>Nous appliquons le principe de minimisation : seules les informations utiles à la vie du grin sont demandées.</p>
+    <ul>
+      <li><strong>Données de compte (obligatoires à l'inscription) :</strong> pseudonyme, adresse e-mail (uniquement pour t'identifier et te connecter, jamais affichée publiquement), niveau déclaré et mot de passe chiffré/haché de manière irréversible (algorithme PBKDF2-SHA256 de Django).</li>
+      <li><strong>Données de profil (facultatives) :</strong> courte biographie, ville, lien vers ton profil GitHub et technologies pratiquées.</li>
+      <li><strong>Contenus publiés volontairement :</strong> projets accrochés au mur (titre, description, liens, captures d'écran ou sorties de terminal), retours épinglés, demandes et engagements sur les coups de main, parcours d'apprentissage, étapes, explications et avis dans les débats.</li>
+      <li><strong>Journaux techniques de sécurité :</strong> journaux standards du serveur web (adresse IP, date, code HTTP) conservés temporairement afin d'assurer la sécurité et la disponibilité du service.</li>
+    </ul>
+
+    <h2>3. Protection particulière des images envoyées</h2>
+    <p>Lorsque tu téléverses une capture d'écran sur le mur, le fichier original n'est <strong>jamais conservé tel quel</strong> : il est vérifié, redimensionné et intégralement réencodé au format WebP. Cette opération supprime automatiquement toutes les métadonnées cachées (EXIF, coordonnées GPS éventuelles, nom de l'appareil).</p>
+
+    <h2>4. Pourquoi utilisons-nous ces données ?</h2>
+    <ul>
+      <li>Permettre la création de ton compte, ton authentification et tes notifications internes ;</li>
+      <li>Afficher tes contributions publiques aux membres et visiteurs du grin (projets, parcours, coups de main, débats, annuaire) ;</li>
+      <li>Protéger la plateforme contre les abus, le spam et les attaques (protection CSRF, politique stricte de sécurité du contenu CSP).</li>
+    </ul>
+
+    <h2 id="cookies">5. Cookies et stockage local</h2>
+    <p>Le Grin n'utilise <strong>aucun cookie publicitaire, analytique tiers ou de profilage</strong>. Les seuls cookies déposés proviennent directement de <code>legrin.nanema.tech</code> :</p>
+    <div class="table-scroll">
+      <table class="legal-table">
+        <thead>
+          <tr><th>Nom du cookie</th><th>Finalité</th><th>Durée</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>csrftoken</code></td><td>Sécurité essentielle : protège les formulaires contre la falsification de requêtes inter-sites (CSRF).</td><td>1 an</td></tr>
+          <tr><td><code>sessionid</code></td><td>Authentification essentielle : maintient ta session ouverte lorsque tu te connectes (ou garde ton vote en attente avant inscription).</td><td>2 semaines (ou déconnexion)</td></tr>
+          <tr><td><code>grin_cookies</code></td><td>Mémorise ton choix sur le bandeau d'information relatif aux cookies pour ne plus t'interrompre.</td><td>6 mois</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Tu peux modifier ta préférence à tout moment via le bouton <strong>« Cookies »</strong> présent en bas de chaque page.</p>
+
+    <h2>6. Partage, hébergement et durée de conservation</h2>
+    <p>Aucune donnée personnelle n'est vendue, louée ou cédée à des tiers. Le site et sa base de données sont hébergés sur un serveur privé virtuel sécurisé sous Linux (chiffrement HTTPS TLS Let's Encrypt). Tes données de compte et tes publications sont conservées tant que ton compte est actif ; tu peux modifier ou retirer tes projets à tout moment depuis leur page.</p>
+
+    <h2>7. Tes droits</h2>
+    <p>Conformément à la réglementation applicable en matière de protection des données à caractère personnel (notamment la loi burkinabè n° 001-2021/AN portant protection des personnes à l'égard du traitement des données à caractère personnel et les standards internationaux RGPD), tu disposes d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition sur tes données.</p>
+    <p>Tu peux directement modifier tes informations depuis la page <a href="{% url 'accounts:edit' %}">Modifier mon profil</a> ou retirer tes publications. Pour toute demande de suppression complète de compte ou question relative à la confidentialité, contacte l'équipe d'administration via le dépôt officiel du projet ou à l'adresse <code>contact@nanema.tech</code>.</p>
+  </div>
+</section>
+{% endblock %}

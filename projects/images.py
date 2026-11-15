@@ -12,16 +12,43 @@ from io import BytesIO
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 MAX_WIDTH = 1440
 MAX_RATIO = 1.6  # hauteur maximale = 1,6 x la largeur : on garde le haut d'une longue page
 MAX_SOURCE_PIXELS = 40_000_000
 MIN_WIDTH = 320
+TARGET_MAX_BYTES = 220 * 1024  # cible de compression WebP (~220 Ko) pour garder le mur rapide
+PAPER_BG = (245, 249, 238)
+
+
+def _flatten_to_rgb(image):
+    """Aplatit proprement la transparence sur le papier clair du Grin au lieu d'un fond noir."""
+    if image.mode == "P" and "transparency" in image.info:
+        image = image.convert("RGBA")
+    if image.mode in ("RGBA", "LA"):
+        rgba = image.convert("RGBA")
+        background = Image.new("RGBA", rgba.size, (*PAPER_BG, 255))
+        return Image.alpha_composite(background, rgba).convert("RGB")
+    return image.convert("RGB")
+
+
+def _encode_webp(image, initial_quality=78, min_quality=58):
+    """Compresse en WebP (method=6) et ajuste la qualité si l'image reste volumineuse."""
+    quality = initial_quality
+    data = b""
+    while quality >= min_quality:
+        buffer = BytesIO()
+        image.save(buffer, "WEBP", quality=quality, method=6)
+        data = buffer.getvalue()
+        if len(data) <= TARGET_MAX_BYTES:
+            break
+        quality -= 8
+    return ContentFile(data, name=f"{uuid.uuid4().hex}.webp")
 
 
 def process_screenshot(upload):
-    """Valide `upload` et renvoie un ContentFile WebP prêt à être enregistré."""
+    """Valide `upload`, nettoie les métadonnées EXIF et renvoie un ContentFile WebP allégé."""
     if upload.size > settings.MAX_SCREENSHOT_BYTES:
         raise ValidationError("Cette image est trop lourde (5 Mo maximum).")
     try:
@@ -30,22 +57,21 @@ def process_screenshot(upload):
         if image.width * image.height > MAX_SOURCE_PIXELS:
             raise ValidationError("Cette image est trop grande.")
         image.load()
+        image = ImageOps.exif_transpose(image)
     except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
         raise ValidationError("Ce fichier n'est pas une image lisible (PNG, JPEG ou WebP).")
 
     if image.width < MIN_WIDTH:
-        raise ValidationError("Cette capture est trop petite pour être lisible.")
+        raise ValidationError("Cette capture est trop petite pour être lisible (320 px minimum).")
 
-    image = image.convert("RGB")
+    image = _flatten_to_rgb(image)
     max_height = int(image.width * MAX_RATIO)
     if image.height > max_height:
         image = image.crop((0, 0, image.width, max_height))
     if image.width > MAX_WIDTH:
         image = image.resize((MAX_WIDTH, round(image.height * MAX_WIDTH / image.width)), Image.LANCZOS)
 
-    buffer = BytesIO()
-    image.save(buffer, "WEBP", quality=80, method=4)
-    return ContentFile(buffer.getvalue(), name=f"{uuid.uuid4().hex}.webp")
+    return _encode_webp(image, initial_quality=78, min_quality=58)
 
 
 # ---------- Projets sans interface graphique ----------
@@ -106,6 +132,4 @@ def render_terminal(text):
         is_prompt = line.lstrip().startswith(("$", ">", "#", "❯"))
         draw.text((pad, bar + pad + index * line_height), line, font=font, fill=_DIM if is_prompt else _INK)
 
-    buffer = BytesIO()
-    image.save(buffer, "WEBP", quality=85, method=4)
-    return ContentFile(buffer.getvalue(), name=f"{uuid.uuid4().hex}.webp")
+    return _encode_webp(image, initial_quality=80, min_quality=65)

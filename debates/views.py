@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -9,7 +9,20 @@ from .services import remember_choice, stance_context
 
 def debate_list(request):
     debates = Debate.objects.annotate(voices=Count("stances")).order_by("-featured", "-created")
-    return render(request, "debates/list.html", {"debates": debates})
+    query = request.GET.get("q", "").strip()
+    if query:
+        debates = debates.filter(Q(question__icontains=query) | Q(intro__icontains=query))
+    items = list(debates)
+    return render(
+        request,
+        "debates/list.html",
+        {
+            "debates": items,
+            "total_count": len(items),
+            "query": query,
+            "has_filters": bool(query),
+        },
+    )
 
 
 def detail(request, slug):

@@ -1,0 +1,17 @@
+<aside class="cookie-banner" id="cookie-banner" data-cookie-banner role="region" aria-label="Gestion des cookies" {% if cookie_choice %}hidden{% endif %}>
+  <div class="cookie-in">
+    <div class="cookie-text">
+      <p class="cookie-title">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c-2.2 0-4-1.5-4-3.5 0-.6.1-1.1.4-1.6-1.9-.2-3.4-1.7-3.6-3.6-.5.2-1.1.4-1.8.4z"/><circle cx="8.5" cy="11.5" r="1"/><circle cx="11.5" cy="15.5" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+        <strong>Respect de ta vie privée au Grin</strong>
+      </p>
+      <p>Ici, aucun traceur publicitaire ni service externe : nous utilisons uniquement les cookies techniques indispensables à ta connexion, à la sécurité des formulaires (CSRF) et à la mémorisation de ce choix. <a href="{% url 'core:privacy' %}#cookies">En savoir plus</a>.</p>
+    </div>
+    <form method="post" action="{% url 'core:cookie_consent' %}" class="cookie-actions" data-cookie-form>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button type="submit" name="choice" value="essential" class="btn btn-small">Essentiels uniquement</button>
+      <button type="submit" name="choice" value="accepted" class="btn btn-small btn-primary">Tout accepter</button>
+    </form>
+  </div>
+</aside>
